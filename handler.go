@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/mail"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -131,4 +132,14 @@ func (m *AmazonSESHandler) ReceiveMail(request http.Request) (*abi.Mail, error) 
 	}
 
 	return nil, errors.New("unknown payload type")
+}
+
+func (m *AmazonSESHandler) SendMimeMail(from mail.Address, mime []byte, to []mail.Address) (string, error) {
+	// not implemented
+	return "", nil
+}
+
+func (m *AmazonSESHandler) ListDomains() ([]string, error) {
+	// not implemented
+	return nil, nil
 }
