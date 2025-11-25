@@ -69,6 +69,7 @@ func (m *AmazonSESHandler) ReceiveMail(request http.Request) (*abi.Mail, error) 
 			// mail := messageJSON.Mail
 			receipt := messageJSON.Receipt
 			mimeContent := messageJSON.Content
+			mailContent := messageJSON.Mail
 
 			var mime []byte
 			var parsed *abi.Mail
@@ -90,6 +91,25 @@ func (m *AmazonSESHandler) ReceiveMail(request http.Request) (*abi.Mail, error) 
 				parsed, err = helpers.ParseMime(mime)
 				if err != nil {
 					return nil, err
+				}
+				if len(parsed.To) == 0 {
+					parsed.To = []mail.Address{}
+					tos := receipt.Recipients
+					if len(tos) > 0 {
+						for _, to := range tos {
+							parsed.To = append(parsed.To, mail.Address{Address: to})
+						}
+					}
+				}
+				if parsed.From.Address == "" {
+					if mailContent != nil {
+						from, err := mail.ParseAddress(mailContent.Source)
+						if err != nil {
+							parsed.From = mail.Address{Address: mailContent.Source}
+						} else {
+							parsed.From = *from
+						}
+					}
 				}
 			}
 			if receipt.SpamVerdict != nil {
